@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "PowerShell(npm install -g uipro-cli 2>&1)",
+      "Bash(npm install *)",
+      "Read(//c/Users/thcel/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python scripts/search.py \"AI course landing page dark modern orange business owners\" --design-system -p \"AI Technician Course\" -f markdown)",
+      "PowerShell(python3 --version 2>&1)",
+      "PowerShell(python --version 2>&1)",
+      "Bash(python scripts/search.py \"premium miniatures 3D printing studio industrial luxury\" --design-system -p \"מיניאטורות 3D\" -f markdown)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\thcel\\\\OneDrive\\\\שולחן העבודה\\\\claude\\\\\" | Where-Object { $_.Extension -match '\\\\.\\(jpg|jpeg|png|webp|gif\\)' } | Select-Object Name)",
+      "PowerShell($desktop = [Environment]::GetFolderPath\\('Desktop'\\); Get-ChildItem $desktop | Select-Object Name, FullName | head -20)"
+    ]
+  }
+}
