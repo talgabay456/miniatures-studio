@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מיניאטורות 3D | סטודיו להדפסה ויצירה בהתאמה אישית</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --orange: #FF6B00;
+  --orange2: #FF8C00;
+  --blue: #1462cc;
+  --muted: #666;
+  --border: rgba(0,0,0,0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+html { scroll-behavior: auto; }
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background: #f5f4f1;
+  color: #111;
+  direction: rtl;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #eee; }
+::-webkit-scrollbar-thumb { background: #111; border-radius: 3px; }
+
+/* ─── HEADER ─── */
+header {
+  position: fixed; top: 0; right: 0; left: 0; z-index: 200;
+  background: transparent;
+  padding: 0 2rem; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background .4s, box-shadow .4s;
+}
+header.solid {
+  background: rgba(245,244,241,0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--border);
+}
+.logo {
+  font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px;
+  color: var(--orange); text-decoration: none;
+  display: flex; align-items: center;
+}
+.logo span { color: #fff; transition: color .4s; }
+header.solid .logo span { color: #111; }
+
+nav { display: flex; gap: 2rem; }
+nav a {
+  color: rgba(255,255,255,0.85); text-decoration: none; font-size: .9rem;
+  font-weight: 500; transition: color .3s;
+}
+nav a::after {
+  content: ''; display: block; height: 2px; background: var(--orange);
+  width: 0; transition: width .3s;
+}
+nav a:hover { color: #fff; }
+nav a:hover::after { width: 100%; }
+header.solid nav a { color: var(--muted); }
+header.solid nav a:hover { color: #111; }
+
+.header-cta {
+  background: #fff; color: #111; font-weight: 700; font-size: .85rem;
+  padding: .45rem 1.2rem; border-radius: 6px; text-decoration: none;
+  transition: background .3s, color .3s, transform .2s;
+}
+.header-cta:hover { background: #111; color: #fff; transform: scale(1.03); }
+header.solid .header-cta { background: #111; color: #fff; }
+header.solid .header-cta:hover { background: #333; }
+
+.menu-toggle {
+  display: none; background: none; border: none; cursor: pointer;
+  color: #fff; font-size: 1.4rem; padding: 4px;
+}
+header.solid .menu-toggle { color: #111; }
+
+/* ─── SCROLL-EXPAND HERO ─── */
+#scroll-hero {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Lock body scroll while hero is not fully expanded */
+body.hero-locked { overflow: hidden; }
+
+/* Background image — fades out as media expands */
+#hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.2)),
+    /* rich dark background simulating a night diorama photo */
+    radial-gradient(ellipse at 30% 60%, #1a1005 0%, #0a0a0a 60%),
+    radial-gradient(ellipse at 70% 40%, #050a1f 0%, #0a0a0a 80%);
+  background-size: cover;
+  transition: opacity .1s linear;
+}
+
+/* Overlay pattern on bg */
+#hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* The expanding media card */
+#hero-card-wrap {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: none; /* JS controls size */
+}
+
+#hero-card {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,0.4);
+  position: relative;
+  width: 100%; height: 100%;
+  background: #111;
+}
+
+/* Image inside card — simulated diorama image */
+#hero-card-img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+}
+#hero-card-img-placeholder {
+  width: 100%; height: 100%;
+  background:
+    linear-gradient(135deg, #1f1205 0%, #2a1500 40%, #050a1f 70%, #0a1225 100%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+#hero-card-img-placeholder::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    45deg, transparent, transparent 20px,
+    rgba(255,107,0,0.025) 20px, rgba(255,107,0,0.025) 40px
+  );
+}
+.card-center-icon {
+  position: relative; z-index: 1;
+  font-size: 3rem; opacity: .18;
+  text-align: center;
+}
+
+/* Dark overlay on card that lifts as scroll progresses */
+#hero-card-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.5);
+  border-radius: 20px;
+  pointer-events: none;
+  transition: none;
+}
+
+/* ─── TITLE WORDS that split apart ─── */
+#hero-title-wrap {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  width: 100%;
+  pointer-events: none;
+  text-align: center;
+}
+
+.hero-word {
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 900;
+  color: #e8e0d5;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  transition: none;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+
+/* scroll-to-expand hint */
+#scroll-hint {
+  position: absolute;
+  bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  text-align: center;
+  color: rgba(255,255,255,0.65);
+  font-size: .85rem; font-weight: 500;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: none;
+  transition: opacity .3s;
+}
+#scroll-hint svg { animation: bounce 1.8s ease-in-out infinite; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+/* ─── CONTENT — appears after hero fully expands ─── */
+#main-content {
+  opacity: 0;
+  transition: opacity .7s ease;
+  pointer-events: none;
+}
+#main-content.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── STATS BAR ─── */
+.stats-bar {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  background: #fff; border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat-item {
+  flex: 1; min-width: 160px; text-align: center;
+  padding: 2rem 1rem; border-left: 1px solid var(--border);
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .5s, transform .5s;
+}
+.stat-item:last-child { border-left: none; }
+.stat-item.visible { opacity: 1; transform: none; }
+.stat-number { font-size: 2.2rem; font-weight: 900; color: var(--orange); line-height: 1; }
+.stat-label { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+
+/* ─── SECTIONS ─── */
+section.page-section { padding: 6rem 2rem; }
+
+.section-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .75rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--orange); margin-bottom: .75rem;
+}
+.section-label::before { content: ''; width: 20px; height: 2px; background: var(--orange); }
+.section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+.section-sub { color: var(--muted); font-size: 1rem; max-width: 520px; line-height: 1.7; }
+.section-divider {
+  width: 48px; height: 3px;
+  background: #111;
+  border-radius: 2px; margin: 1.5rem 0 3rem;
+}
+
+.fade-up {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.fade-up.visible { opacity: 1; transform: none; }
+
+/* ─── GALLERY ─── */
+#gallery { background: #f0eeeb; }
+.gallery-header { max-width: 1200px; margin: 0 auto 3rem; }
+
+.category-tabs {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  margin-bottom: 3rem; max-width: 1200px; margin-inline: auto;
+}
+.tab-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Heebo', sans-serif;
+  font-size: .85rem; font-weight: 600; cursor: pointer;
+  padding: .5rem 1.2rem; border-radius: 100px;
+  transition: all .2s; white-space: nowrap;
+}
+.tab-btn:hover { border-color: #111; color: #111; }
+.tab-btn.active { background: #111; border-color: #111; color: #fff; }
+
+.gallery-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem; max-width: 1200px; margin: 0 auto;
+}
+.gallery-card {
+  background: #fff; border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden; cursor: pointer;
+  transition: transform .3s, box-shadow .3s;
+  opacity: 0; transform: translateY(20px);
+}
+.gallery-card.visible { opacity: 1; transform: none; }
+.gallery-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.09); }
+.card-img { aspect-ratio: 4/3; position: relative; overflow: hidden; }
+.card-img-bg { position: absolute; inset: 0; }
+.card-corner {
+  position: absolute; top: 0; left: 0;
+  width: 0; height: 0; border-style: solid;
+  border-width: 0 0 32px 32px;
+  border-color: transparent transparent transparent var(--orange);
+  transition: border-width .2s;
+}
+.gallery-card:hover .card-corner { border-width: 0 0 44px 44px; }
+.card-badge {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(4px);
+  color: var(--blue); font-size: .7rem; font-weight: 700;
+  letter-spacing: 1px; padding: 3px 8px; border-radius: 4px;
+  border: 1px solid rgba(20,98,204,0.18);
+}
+.card-body { padding: 1rem 1.1rem 1.2rem; }
+.card-title { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+.card-desc { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+/* ─── ORDER ─── */
+#order { background: #f5f4f1; }
+.order-inner {
+  max-width: 800px; margin: 0 auto;
+  background: #fff; border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 20px; padding: 3rem;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: .85rem; font-weight: 600; color: #111; }
+label .req { color: var(--orange); margin-right: 2px; }
+input[type="text"], input[type="tel"], input[type="email"], textarea, select {
+  background: #faf9f7; border: 1px solid rgba(0,0,0,0.12);
+  border-radius: var(--radius-sm); color: #111;
+  font-family: 'Heebo', sans-serif; font-size: .95rem;
+  padding: .75rem 1rem; outline: none; width: 100%;
+  transition: border-color .2s; direction: rtl;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+textarea { resize: vertical; min-height: 120px; }
+select option { background: #faf9f7; }
+.file-upload {
+  background: #faf9f7; border: 2px dashed rgba(0,0,0,0.12);
+  border-radius: var(--radius-sm); padding: 2rem;
+  text-align: center; cursor: pointer; transition: border-color .2s, background .2s;
+}
+.file-upload:hover { border-color: #111; background: rgba(0,0,0,0.02); }
+.file-upload input { display: none; }
+.file-upload-text { font-size: .85rem; color: var(--muted); }
+.file-upload-text strong { color: #111; }
+.file-names { margin-top: .5rem; font-size: .8rem; color: var(--blue); }
+.form-submit { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; margin-top: 1.5rem; grid-column: 1 / -1; }
+.form-note { font-size: .8rem; color: var(--muted); }
+.btn-primary, .btn-submit {
+  background: #111; color: #fff; font-weight: 700; font-size: 1rem;
+  padding: .85rem 2.2rem; border-radius: 8px; text-decoration: none;
+  border: none; cursor: pointer; font-family: 'Heebo', sans-serif;
+  transition: background .2s, transform .2s, box-shadow .2s; display: inline-block;
+}
+.btn-primary:hover, .btn-submit:hover {
+  background: #333; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+}
+.btn-submit { width: 100%; font-weight: 800; padding: .9rem 2.5rem; }
+.btn-secondary {
+  background: transparent; color: #111; font-weight: 600; font-size: 1rem;
+  padding: .85rem 2.2rem; border-radius: 8px; text-decoration: none;
+  border: 1px solid rgba(0,0,0,0.18); transition: border-color .2s, background .2s; display: inline-block;
+}
+.btn-secondary:hover { border-color: #111; background: rgba(0,0,0,0.04); }
+
+.form-success { display: none; text-align: center; padding: 2rem; }
+.form-success .check {
+  width: 60px; height: 60px; background: rgba(30,200,100,0.08);
+  border: 2px solid rgba(30,200,100,0.3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin: 0 auto 1rem;
+}
+.form-success h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+.form-success p { color: var(--muted); font-size: .9rem; }
+
+/* ─── ABOUT ─── */
+#about { background: #f0eeeb; }
+.about-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+}
+.about-features { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; }
+.feature-item {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 1.25rem; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius); transition: box-shadow .2s;
+}
+.feature-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+.feature-icon {
+  width: 44px; height: 44px; flex-shrink: 0;
+  background: rgba(255,107,0,0.08); border: 1px solid rgba(255,107,0,0.18);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.feature-text h4 { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+.feature-text p { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+.about-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; position: relative; }
+.about-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; aspect-ratio: 3/4; position: relative;
+}
+.about-card:first-child { margin-top: 2rem; }
+.about-card-bg { position: absolute; inset: 0; }
+.about-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 55%);
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 1rem;
+}
+.about-card-overlay span { font-size: .75rem; color: var(--orange); font-weight: 700; }
+.about-card-overlay p { font-size: .85rem; font-weight: 600; color: #fff; margin-top: 2px; }
+.about-float-badge {
+  position: absolute; bottom: -1rem; right: -1rem;
+  background: #111; color: #fff; font-weight: 800; font-size: .85rem;
+  padding: .75rem 1.2rem; border-radius: var(--radius);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 2;
+}
+
+/* ─── CONTACT ─── */
+#contact { background: #f5f4f1; }
+.contact-inner { max-width: 900px; margin: 0 auto; }
+.contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 3rem; }
+.contact-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center;
+  transition: transform .3s, box-shadow .3s; text-decoration: none; color: #111; display: block;
+}
+.contact-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
+.contact-card-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;
+}
+.icon-wa { background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.18); }
+.icon-phone { background: rgba(20,98,204,0.08); border: 1px solid rgba(20,98,204,0.18); }
+.icon-email { background: rgba(255,107,0,0.08); border: 1px solid rgba(255,107,0,0.18); }
+.contact-card h4 { font-size: .85rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+.contact-card p { font-size: 1rem; font-weight: 700; }
+.contact-action { display: inline-block; margin-top: .75rem; font-size: .8rem; color: var(--orange); font-weight: 600; }
+.contact-map-placeholder {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 3rem; text-align: center; color: var(--muted); font-size: .9rem;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: #111; color: #fff;
+  padding: 3rem 2rem; text-align: center;
+}
+.footer-logo { font-size: 1.3rem; font-weight: 900; color: var(--orange); margin-bottom: .5rem; }
+.footer-logo span { color: #fff; }
+.footer-text { font-size: .8rem; color: rgba(255,255,255,0.4); }
+.footer-links { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0; }
+.footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: .85rem; transition: color .2s; }
+.footer-links a:hover { color: var(--orange); }
+
+/* ─── FLOATING WHATSAPP ─── */
+.wa-float {
+  position: fixed; bottom: 2rem; left: 2rem; z-index: 300;
+  width: 58px; height: 58px; border-radius: 50%; background: #25D366; color: #fff;
+  display: flex; align-items: center; justify-content: center; text-decoration: none;
+  box-shadow: 0 4px 16px rgba(37,211,102,0.35); transition: transform .2s;
+}
+.wa-float:hover { transform: scale(1.08); }
+.wa-float::before {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  background: rgba(37,211,102,0.22); animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: .5; }
+  50% { transform: scale(1.3); opacity: 0; }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  nav { display: none; flex-direction: column; position: fixed; top: 64px; right: 0; left: 0;
+    background: rgba(245,244,241,0.98); padding: 1.5rem 2rem; gap: 1rem; border-bottom: 1px solid var(--border); }
+  nav.open { display: flex; }
+  nav a { color: var(--muted) !important; font-size: 1rem; }
+  nav a:hover { color: #111 !important; }
+  .menu-toggle { display: block; }
+  .header-cta { font-size: .8rem; padding: .4rem .9rem; }
+  .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .about-visual { order: -1; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .order-inner { padding: 1.75rem 1.25rem; }
+  section.page-section { padding: 4rem 1.25rem; }
+  .hero-word { font-size: clamp(2rem, 9vw, 3.5rem); }
+}
+@media (max-width: 480px) {
+  .category-tabs { gap: .35rem; }
+  .tab-btn { font-size: .78rem; padding: .4rem .85rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body class="hero-locked">
+
+<!-- ─── HEADER ─── -->
+<header id="main-header">
+  <a class="logo" href="#scroll-hero">
+    <img src="logo.jpeg" alt="לוגו מיניאטורות 3D" style="height:42px;width:auto;object-fit:contain;border-radius:6px;">
+  </a>
+  <nav id="main-nav">
+    <a href="#gallery">גלריה</a>
+    <a href="#order">הזמנה</a>
+    <a href="#about">אודות</a>
+    <a href="#contact">צור קשר</a>
+  </nav>
+  <a class="header-cta" href="#order">קבל הצעת מחיר</a>
+  <button class="menu-toggle" id="menu-toggle" aria-label="תפריט">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</header>
+
+<!-- ─── SCROLL-EXPAND HERO ─── -->
+<div id="scroll-hero">
+
+  <!-- Background that fades out -->
+  <div id="hero-bg"></div>
+
+  <!-- Expanding media card -->
+  <div id="hero-card-wrap">
+    <div id="hero-card">
+      <img id="hero-card-img" src="770.jpeg" alt="מיניאטורת בניין בריטי" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <div id="hero-card-overlay"></div>
+    </div>
+  </div>
+
+  <!-- Title that splits apart -->
+  <div id="hero-title-wrap" aria-label="מיניאטורות בהתאמה אישית">
+    <span class="hero-word" id="word-1">מיניאטורות</span>
+    <span class="hero-word" id="word-2">בהתאמה אישית</span>
+  </div>
+
+  <!-- Scroll hint -->
+  <div id="scroll-hint">
+    <span>גלול להרחבה</span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+</div>
+
+<!-- ─── MAIN CONTENT — revealed after hero expands ─── -->
+<div id="main-content">
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-number">200+</div><div class="stat-label">פרויקטים הושלמו</div></div>
+    <div class="stat-item"><div class="stat-number">5+</div><div class="stat-label">שנות ניסיון</div></div>
+    <div class="stat-item"><div class="stat-number">0.1mm</div><div class="stat-label">דיוק הדפסה</div></div>
+    <div class="stat-item"><div class="stat-number">100%</div><div class="stat-label">שביעות רצון</div></div>
+  </div>
+
+  <!-- Gallery -->
+  <section id="gallery" class="page-section">
+    <div class="gallery-header fade-up">
+      <div class="section-label">הגלריה שלנו</div>
+      <h2 class="section-title">עבודות שדיברו בעד עצמן</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="category-tabs fade-up">
+      <button class="tab-btn active" data-cat="all">הכל</button>
+      <button class="tab-btn" data-cat="miniatures">מיניאטורות</button>
+      <button class="tab-btn" data-cat="buildings">דגמי מבנים</button>
+      <button class="tab-btn" data-cat="trains">רכבות ונופים</button>
+      <button class="tab-btn" data-cat="signs">שלטים בהתאמה</button>
+      <button class="tab-btn" data-cat="special">פרויקטים מיוחדים</button>
+    </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-card" data-cat="miniatures">
+        <div class="card-img">
+          <img src="WhatsApp%20Image%202026-06-17%20at%2023.06.47%20(1).jpeg" alt="מיניאטורת בניין עירוני עם תאורת ניאון" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div class="card-corner"></div>
+        </div>
+      </div>
+      <div class="gallery-card" data-cat="buildings">
+        <div class="card-img">
+          <img src="WhatsApp%20Image%202026-06-17%20at%2023.06.47.jpeg" alt="דיורמה בית עם רכב Fast and Furious" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div class="card-corner"></div>
+        </div>
+      </div>
+      <div class="gallery-card" data-cat="special">
+        <div class="card-img">
+          <img src="WhatsApp%20Image%202026-06-17%20at%2023.06.48%20(1).jpeg" alt="דגם בניין ציון רבי נחמן מברסלב" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div class="card-corner"></div>
+        </div>
+      </div>
+      <div class="gallery-card" data-cat="trains">
+        <div class="card-img">
+          <img src="WhatsApp%20Image%202026-06-17%20at%2023.06.48%20(4).jpeg" alt="סצנת Fast and Furious עם סופרה וג'טה" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div class="card-corner"></div>
+        </div>
+      </div>
+      <div class="gallery-card" data-cat="buildings">
+        <div class="card-img">
+          <img src="WhatsApp%20Image%202026-06-17%20at%2023.06.48.jpeg" alt="דגם ישיבת נחלת הלויים" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div class="card-corner"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Order Form -->
+  <section id="order" class="page-section">
+    <div class="order-inner fade-up">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <div class="section-label" style="justify-content:center;">בוא נתחיל</div>
+        <h2 class="section-title">שלח בקשה להצעת מחיר</h2>
+        <p class="section-sub" style="margin:0 auto;">מלא את הפרטים ואחזור אליך תוך 24 שעות עם הצעת מחיר מותאמת.</p>
+      </div>
+      <form id="order-form" novalidate>
+        <div class="form-grid">
+          <div class="form-group"><label for="name">שם מלא <span class="req">*</span></label><input type="text" id="name" placeholder="ישראל ישראלי" required></div>
+          <div class="form-group"><label for="phone">טלפון <span class="req">*</span></label><input type="tel" id="phone" placeholder="050-0000000" required></div>
+          <div class="form-group"><label for="email">אימייל</label><input type="email" id="email" placeholder="your@email.com"></div>
+          <div class="form-group">
+            <label for="size">גודל רצוי</label>
+            <select id="size">
+              <option value="" disabled selected>בחר גודל משוער</option>
+              <option>קטן — עד 15 ס״מ</option>
+              <option>בינוני — 15–40 ס״מ</option>
+              <option>גדול — 40–80 ס״מ</option>
+              <option>ענק — מעל 80 ס״מ</option>
+              <option>לא יודע / לדון</option>
+            </select>
+          </div>
+          <div class="form-group full"><label for="idea">תיאור הרעיון <span class="req">*</span></label><textarea id="idea" placeholder="ספר לנו על הפרויקט שלך…" required></textarea></div>
+          <div class="form-group full">
+            <label>תמונות / קבצים (אופציונלי)</label>
+            <div class="file-upload" onclick="document.getElementById('file-input').click()">
+              <input type="file" id="file-input" multiple accept="image/*,.pdf,.stl">
+              <div class="file-upload-text"><strong>לחץ להעלאת קבצים</strong> או גרור לכאן<br>תמונות, PDF, STL — עד 20MB</div>
+              <div class="file-names" id="file-names"></div>
+            </div>
+          </div>
+          <div class="form-submit">
+            <button type="submit" class="btn-submit">שלח בקשה להצעת מחיר ←</button>
+            <p class="form-note">* שדות חובה. המידע שלך מאובטח ולא יועבר לצד שלישי.</p>
+          </div>
+        </div>
+      </form>
+      <div class="form-success" id="form-success">
+        <div class="check">✓</div>
+        <h3>תודה! הבקשה נשלחה בהצלחה</h3>
+        <p>קיבלנו את פרטיך ונחזור אליך תוך 24 שעות עם הצעת מחיר מותאמת.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="page-section">
+    <div class="about-inner">
+      <div class="fade-up">
+        <div class="section-label">הסיפור שלנו</div>
+        <h2 class="section-title">יצירה, טכנולוגיה ואהבה לפרטים</h2>
+        <div class="section-divider"></div>
+        <p class="section-sub">מיניאטורות 3D נוסד מתוך תשוקה עמוקה לאמנות מיניאטורות ולטכנולוגיית הדפסה תלת ממדית. אנחנו מאמינים שכל רעיון ראוי להפוך לאובייקט פיזי מדויק ויפה.</p>
+        <p class="section-sub" style="margin-top:1rem;">עם ציוד הדפסה מתקדם, חומרים איכותיים וידיים של אמנים — כל פרויקט ייחודי, מוגמר לשלמות ומסופק בזמן.</p>
+        <div class="about-features">
+          <div class="feature-item">
+            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+            <div class="feature-text"><h4>הדפסה בדיוק של 0.1mm</h4><p>מדפסות FDM ו-Resin מתקדמות מאפשרות פרטים עדינים שאי אפשר להשיג ביד.</p></div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+            <div class="feature-text"><h4>גימור יד מקצועי</h4><p>כל מודל עובר גימור ידני — צביעה, ליטוש, ציפויים ותאורה מותאמת אישית.</p></div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+            <div class="feature-text"><h4>התאמה אישית מלאה</h4><p>מהגודל, לחומר, לצבע ולפרטים — הכל מותאם בדיוק לפי הצרכים שלך.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="about-visual fade-up">
+        <div class="about-card"><div class="about-card-bg" style="background:linear-gradient(135deg,#1f1205,#2a1500);"></div><div class="about-card-overlay"><span>מיניאטורה</span><p>בניין עם תאורת ניאון</p></div></div>
+        <div class="about-card" style="margin-top:2rem;"><div class="about-card-bg" style="background:linear-gradient(135deg,#050a1f,#0a1225);"></div><div class="about-card-overlay"><span>דגם</span><p>וילה אדריכלית</p></div></div>
+        <div class="about-float-badge">+200 פרויקטים</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="page-section">
+    <div class="contact-inner">
+      <div class="fade-up" style="text-align:center;margin-bottom:3rem;">
+        <div class="section-label" style="justify-content:center;">בואו נדבר</div>
+        <h2 class="section-title">צור קשר</h2>
+        <p class="section-sub" style="margin:0 auto;">שאלה? רעיון? מוכן להזמין? אנחנו זמינים לכל פנייה.</p>
+      </div>
+      <div class="contact-grid fade-up">
+        <a class="contact-card" href="https://wa.me/972501234567" target="_blank" rel="noopener">
+          <div class="contact-card-icon icon-wa"><svg width="28" height="28" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg></div>
+          <h4>WhatsApp</h4><p>050-000-0000</p><span class="contact-action">שלח הודעה ←</span>
+        </a>
+        <div class="contact-card" style="cursor:default;">
+          <div class="contact-card-icon icon-phone"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1462cc" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.68 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6 6l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <h4>טלפון</h4><p>050-000-0000</p><span class="contact-action">א׳–ו׳ | 09:00–20:00</span>
+        </div>
+        <a class="contact-card" href="mailto:info@miniatures3d.co.il">
+          <div class="contact-card-icon icon-email"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <h4>אימייל</h4><p>info@miniatures3d.co.il</p><span class="contact-action">מענה תוך 24 שעות ←</span>
+        </a>
+      </div>
+      <div class="contact-map-placeholder fade-up">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.25;margin:0 auto 1rem;display:block;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        מיקום הסטודיו — ישראל<br>
+        <span style="font-size:.8rem;color:#aaa;">ניתן לקבוע פגישה לאיסוף/ייעוץ</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">מיניאטורות <span>3D</span></div>
+    <div class="footer-links">
+      <a href="#gallery">גלריה</a><a href="#order">הזמנה</a>
+      <a href="#about">אודות</a><a href="#contact">צור קשר</a>
+    </div>
+    <p class="footer-text">© 2025 מיניאטורות 3D · כל הזכויות שמורות · עוצב ונבנה בישראל</p>
+  </footer>
+
+</div><!-- /main-content -->
+
+<!-- Floating WhatsApp -->
+<a class="wa-float" href="https://wa.me/972501234567" target="_blank" rel="noopener" aria-label="שלח הודעה ב-WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+</a>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ─── STATE ─── */
+  let progress = 0;
+  let fullyExpanded = false;
+  let touchStartY = 0;
+  let isMobile = window.innerWidth < 768;
+
+  /* ─── ELEMENTS ─── */
+  const heroBg       = document.getElementById('hero-bg');
+  const cardWrap     = document.getElementById('hero-card-wrap');
+  const card         = document.getElementById('hero-card');
+  const cardOverlay  = document.getElementById('hero-card-overlay');
+  const word1        = document.getElementById('word-1');
+  const word2        = document.getElementById('word-2');
+  const scrollHint   = document.getElementById('scroll-hint');
+  const mainContent  = document.getElementById('main-content');
+  const header       = document.getElementById('main-header');
+
+  window.addEventListener('resize', () => { isMobile = window.innerWidth < 768; });
+
+  /* ─── APPLY PROGRESS ─── */
+  function applyProgress(p) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    /* Card size: start small, grow to fill screen */
+    const startW = isMobile ? 300 : 340;
+    const growW  = isMobile ? 650 : 1250;
+    const startH = isMobile ? 320 : 400;
+    const growH  = isMobile ? 200 : 400;
+
+    const w = Math.min(startW + p * growW, vw * 0.98);
+    const h = Math.min(startH + p * growH, vh * 0.96);
+
+    cardWrap.style.width  = w + 'px';
+    cardWrap.style.height = h + 'px';
+
+    /* Border radius collapses to 0 when fully expanded */
+    const br = Math.max(20 * (1 - p * 1.5), 0);
+    card.style.borderRadius = br + 'px';
+
+    /* Card overlay fades away */
+    const overlayOpacity = Math.max(0.5 - p * 0.5, 0);
+    cardOverlay.style.opacity = overlayOpacity;
+
+    /* Background fades out */
+    heroBg.style.opacity = 1 - p;
+
+    /* Title words slide apart — using vw units like the React component */
+    const tx = p * (isMobile ? 55 : 45); /* % of vw */
+    word1.style.transform = `translateX(${tx}vw)`;   /* RTL: first word goes right */
+    word2.style.transform = `translateX(-${tx}vw)`;  /* second goes left */
+
+    /* Title fades as it slides far */
+    const titleOpacity = p > 0.6 ? Math.max(0, 1 - (p - 0.6) / 0.3) : 1;
+    word1.style.opacity = titleOpacity;
+    word2.style.opacity = titleOpacity;
+
+    /* Scroll hint fades out early */
+    scrollHint.style.opacity = Math.max(0, 1 - p * 4);
+  }
+
+  /* ─── EXPAND COMPLETE ─── */
+  function onFullyExpanded() {
+    fullyExpanded = true;
+    document.body.classList.remove('hero-locked');
+    mainContent.classList.add('visible');
+    header.classList.add('solid');
+
+    /* Snap card to true full-screen */
+    cardWrap.style.width  = '100vw';
+    cardWrap.style.height = '100dvh';
+    card.style.borderRadius = '0';
+
+    /* Kick off scroll-triggered animations for content */
+    setTimeout(initObservers, 100);
+  }
+
+  /* ─── COLLAPSE (scroll back up) ─── */
+  function onCollapse() {
+    fullyExpanded = false;
+    document.body.classList.add('hero-locked');
+    mainContent.classList.remove('visible');
+    header.classList.remove('solid');
+    window.scrollTo(0, 0);
+  }
+
+  /* ─── WHEEL ─── */
+  function handleWheel(e) {
+    if (fullyExpanded) {
+      if (e.deltaY < 0 && window.scrollY <= 5) {
+        onCollapse();
+        progress = 1;
+        e.preventDefault();
+      }
+      return;
+    }
+    e.preventDefault();
+    const delta = e.deltaY * 0.001;
+    progress = Math.min(Math.max(progress + delta, 0), 1);
+    applyProgress(progress);
+    if (progress >= 1) onFullyExpanded();
+  }
+
+  /* ─── TOUCH ─── */
+  function handleTouchStart(e) {
+    touchStartY = e.touches[0].clientY;
+  }
+  function handleTouchMove(e) {
+    if (!touchStartY) return;
+    const deltaY = touchStartY - e.touches[0].clientY;
+
+    if (fullyExpanded) {
+      if (deltaY < -30 && window.scrollY <= 5) {
+        onCollapse();
+        progress = 1;
+        e.preventDefault();
+      }
+      return;
+    }
+    e.preventDefault();
+    const factor = deltaY < 0 ? 0.009 : 0.006;
+    progress = Math.min(Math.max(progress + deltaY * factor, 0), 1);
+    applyProgress(progress);
+    if (progress >= 1) onFullyExpanded();
+    touchStartY = e.touches[0].clientY;
+  }
+  function handleTouchEnd() { touchStartY = 0; }
+
+  /* ─── KEEP SCROLL LOCKED during hero phase ─── */
+  function handleScroll() {
+    if (!fullyExpanded) window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('wheel',      handleWheel,      { passive: false });
+  window.addEventListener('touchstart', handleTouchStart, { passive: false });
+  window.addEventListener('touchmove',  handleTouchMove,  { passive: false });
+  window.addEventListener('touchend',   handleTouchEnd);
+  window.addEventListener('scroll',     handleScroll,     { passive: true });
+
+  /* ─── INITIAL RENDER ─── */
+  applyProgress(0);
+
+  /* ─── MOBILE MENU + NAV LINKS ─── */
+  const menuToggle = document.getElementById('menu-toggle');
+  const nav = document.getElementById('main-nav');
+  menuToggle.addEventListener('click', () => nav.classList.toggle('open'));
+
+  nav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      nav.classList.remove('open');
+      const href = a.getAttribute('href');
+      if (!href || href === '#scroll-hero') return;
+      const target = document.querySelector(href);
+      if (!target) return;
+
+      /* If hero not yet expanded — complete it instantly then scroll */
+      if (!fullyExpanded) {
+        e.preventDefault();
+        progress = 1;
+        applyProgress(1);
+        onFullyExpanded();
+        /* Wait one frame for content to appear, then scroll */
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }, 80);
+        });
+      }
+      /* If already expanded — let the browser handle the anchor scroll normally */
+    });
+  });
+
+  /* ─── SCROLL OBSERVERS (for content sections) ─── */
+  function initObservers() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up, .stat-item').forEach((el, i) => {
+      el.style.transitionDelay = (i * 60) + 'ms';
+      obs.observe(el);
+    });
+
+    const cardObs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); cardObs.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.gallery-card').forEach((c, i) => {
+      c.style.transitionDelay = (i * 55) + 'ms';
+      cardObs.observe(c);
+    });
+  }
+
+  /* ─── GALLERY TABS ─── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = btn.dataset.cat;
+      document.querySelectorAll('.gallery-card').forEach(c => {
+        c.style.display = (cat === 'all' || c.dataset.cat === cat) ? '' : 'none';
+      });
+    });
+  });
+
+  /* ─── FILE UPLOAD ─── */
+  const fileInput = document.getElementById('file-input');
+  const fileNames = document.getElementById('file-names');
+  fileInput && fileInput.addEventListener('change', () => {
+    fileNames.textContent = Array.from(fileInput.files).map(f => f.name).join(', ');
+  });
+
+  /* ─── FORM SUBMIT ─── */
+  const form = document.getElementById('order-form');
+  form && form.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const idea = document.getElementById('idea').value.trim();
+    if (!name || !phone || !idea) {
+      [['name',name],['phone',phone],['idea',idea]].forEach(([id,val]) => {
+        if (!val) { const el = document.getElementById(id); el.style.borderColor='#e74c3c'; el.focus(); }
+      });
+      return;
+    }
+    form.style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+  });
+  document.querySelectorAll('#order-form input, #order-form textarea').forEach(el => {
+    el.addEventListener('input', () => el.style.borderColor = '');
+  });
+
+})();
+</script>
+</body>
+</html>
