@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חנות | סטודיו מיניאטורות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Heebo', sans-serif; background: #000; color: #fff; direction: rtl; overflow: hidden; height: 100dvh; }
+
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+header {
+  position: fixed; top: 0; right: 0; left: 0; z-index: 200;
+  background: rgba(0,0,0,0.25); backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  padding: 0 2rem; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { text-decoration: none; display: flex; align-items: center; }
+nav { display: flex; gap: 2rem; }
+nav a {
+  color: rgba(255,255,255,0.8); text-decoration: none; font-size: .9rem;
+  font-weight: 500; transition: color .25s;
+}
+nav a:hover { color: #fff; }
+nav a.active { color: #FF6B00; }
+.header-cta {
+  background: rgba(255,255,255,0.12); color: #fff; font-weight: 700; font-size: .85rem;
+  padding: .45rem 1.2rem; border-radius: 8px; text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.12); transition: background .25s;
+}
+.header-cta:hover { background: rgba(255,255,255,0.22); }
+
+.page-center {
+  position: relative; z-index: 10;
+  height: 100dvh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 0 2rem;
+}
+
+.glass-box {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 4rem 3.5rem;
+  max-width: 520px;
+  width: 100%;
+  animation: fadeIn .8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.store-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  filter: drop-shadow(0 0 20px rgba(255,107,0,0.4));
+}
+
+h1 {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.highlight { color: #FF6B00; }
+
+p {
+  color: rgba(255,255,255,0.6);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: .6rem;
+  background: rgba(255,255,255,0.1); color: #fff;
+  font-family: 'Heebo', sans-serif; font-size: .95rem; font-weight: 600;
+  padding: .8rem 1.8rem; border-radius: 12px; text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: background .25s, transform .25s;
+  backdrop-filter: blur(8px);
+}
+.back-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+
+@media (max-width: 480px) {
+  .glass-box { padding: 2.5rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<header>
+  <a class="logo" href="index.html">
+    <img src="logo.jpeg" alt="לוגו" style="height:42px;width:auto;object-fit:contain;border-radius:6px;">
+  </a>
+  <nav>
+    <a href="index.html#gallery">גלריה</a>
+    <a href="index.html#order">הזמנה</a>
+    <a href="index.html#about">אודות</a>
+    <a href="index.html#contact">צור קשר</a>
+    <a href="store.html" class="active">חנות</a>
+  </nav>
+  <a class="header-cta" href="index.html#order">קבל הצעת מחיר</a>
+</header>
+
+<div class="page-center">
+  <div class="glass-box">
+    <span class="store-icon">🏪</span>
+    <h1>החנות <span class="highlight">תעלה בקרוב</span></h1>
+    <p>אנחנו עובדים על משהו מיוחד עבורכם.<br>החנות המקוונת שלנו תהיה זמינה בקרוב עם מוצרים ייחודיים.</p>
+    <a class="back-btn" href="index.html">← חזרה לאתר הראשי</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+
+  const vs = `attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0,1);}`;
+  const fs = `
+    precision highp float;
+    uniform vec2 u_res;
+    uniform float u_time;
+    void main(){
+      vec2 p=(gl_FragCoord.xy*2.0-u_res)/min(u_res.x,u_res.y);
+      float d=length(p)*0.05;
+      float rx=p.x*(1.0+d), gx=p.x, bx=p.x*(1.0-d);
+      float r=0.05/abs(p.y+sin((rx+u_time)*1.0)*0.5);
+      float g=0.05/abs(p.y+sin((gx+u_time)*1.0)*0.5);
+      float b=0.05/abs(p.y+sin((bx+u_time)*1.0)*0.5);
+      gl_FragColor=vec4(r,g,b,1.0);
+    }
+  `;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s); return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,-1,1,1,-1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes  = gl.getUniformLocation(prog, 'u_res');
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let t = 0;
+  (function render() {
+    t += 0.01;
+    gl.uniform1f(uTime, t);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(render);
+  })();
+})();
+</script>
+</body>
+</html>
