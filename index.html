@@ -673,48 +673,34 @@ footer {
     fileNames.textContent = Array.from(fileInput.files).map(f => f.name).join(', ');
   });
 
-  /* ─── FORM SUBMIT → Web3Forms ─── */
+  /* ─── FORM SUBMIT → WhatsApp ─── */
   const form = document.getElementById('order-form');
-  form && form.addEventListener('submit', async e => {
+  form && form.addEventListener('submit', e => {
     e.preventDefault();
-    const name = document.getElementById('name').value.trim();
+    const name  = document.getElementById('name').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const idea = document.getElementById('idea').value.trim();
+    const idea  = document.getElementById('idea').value.trim();
     if (!name || !phone || !idea) {
       [['name',name],['phone',phone],['idea',idea]].forEach(([id,val]) => {
         if (!val) { const el = document.getElementById(id); el.style.borderColor='#e74c3c'; el.focus(); }
       });
       return;
     }
-    const btn = form.querySelector('.btn-submit');
-    btn.textContent = 'שולח…'; btn.disabled = true;
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          access_key: 'c4b7e5e4-e602-4e93-8b4b-a7bd614f0378',
-          subject: 'הצעת מחיר חדשה - סטודיו מיניאטורות',
-          from_name: 'סטודיו מיניאטורות - אתר',
-          שם: name,
-          טלפון: phone,
-          אימייל: document.getElementById('email').value.trim(),
-          גודל: document.getElementById('size').value,
-          'תיאור הרעיון': idea
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        form.style.display = 'none';
-        document.getElementById('form-success').style.display = 'block';
-      } else {
-        btn.textContent = 'שלח בקשה להצעת מחיר ←'; btn.disabled = false;
-        alert('אירעה שגיאה, נסה שוב.');
-      }
-    } catch {
-      btn.textContent = 'שלח בקשה להצעת מחיר ←'; btn.disabled = false;
-      alert('אירעה שגיאה, נסה שוב.');
-    }
+    const email = document.getElementById('email').value.trim();
+    const size  = document.getElementById('size').value;
+    const msg = [
+      '📋 *בקשה חדשה להצעת מחיר*',
+      '',
+      `*שם:* ${name}`,
+      `*טלפון:* ${phone}`,
+      email ? `*אימייל:* ${email}` : '',
+      size  ? `*גודל:* ${size}`   : '',
+      `*תיאור הרעיון:* ${idea}`
+    ].filter(Boolean).join('\n');
+
+    window.open('https://wa.me/9720543984404?text=' + encodeURIComponent(msg), '_blank');
+    form.style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
   });
   document.querySelectorAll('#order-form input, #order-form textarea').forEach(el => {
     el.addEventListener('input', () => el.style.borderColor = '');
